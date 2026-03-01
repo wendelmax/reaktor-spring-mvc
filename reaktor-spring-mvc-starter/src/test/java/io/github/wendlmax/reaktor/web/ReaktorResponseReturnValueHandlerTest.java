@@ -111,7 +111,7 @@ class ReaktorResponseReturnValueHandlerTest {
         Method viewMethod = ViewTestController.class.getMethod("respondView");
         MethodParameter returnType = new MethodParameter(viewMethod, -1);
 
-        ReaktorResponse<String> responseObj = ReaktorResponse.error("Error occurred")
+        ReaktorResponse<String> responseObj = ReaktorResponse.<String>error("Error occurred")
                 .withData("dummy-data");
 
         handler.handleReturnValue(responseObj, returnType, mavContainer, webRequest);

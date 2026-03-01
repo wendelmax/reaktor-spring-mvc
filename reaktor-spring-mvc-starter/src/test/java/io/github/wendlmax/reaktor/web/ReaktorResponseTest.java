@@ -38,7 +38,7 @@ class ReaktorResponseTest {
         assertThat(r1.success()).isTrue();
         assertThat(r1.entity().getBody()).isEqualTo("present");
 
-        ReaktorResponse<String> r2 = ReaktorResponse.ok(Optional.empty());
+        ReaktorResponse<String> r2 = ReaktorResponse.ok(Optional.<String>empty());
         assertThat(r2.success()).isFalse();
         assertThat(r2.entity().getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }

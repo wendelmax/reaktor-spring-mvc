@@ -22,49 +22,50 @@ public record ReaktorResponse<T>(
     }
 
     public static <T> ReaktorResponse<T> ok(T data) {
-        return new ReaktorResponse<>(ResponseEntity.ok(data), true, null, null, null, new java.util.HashMap<>());
+        return new ReaktorResponse<>(ResponseEntity.ok(data), true, null, null, null, java.util.Collections.emptyMap());
     }
 
     public static <T> ReaktorResponse<T> ok() {
-        return ok(null);
+        return ok((T) null);
     }
 
     public static <T> ReaktorResponse<T> ok(java.util.Optional<T> optional) {
-        return optional.map(ReaktorResponse::ok).orElseGet(ReaktorResponse::notFound);
+        return optional.map(ReaktorResponse::ok).orElseGet(() -> ReaktorResponse.notFound());
     }
 
     public static <T> ReaktorResponse<T> view(String viewName) {
         return new ReaktorResponse<>(ResponseEntity.ok().build(), true, null, null, viewName,
-                new java.util.HashMap<>());
+                java.util.Collections.emptyMap());
     }
 
     public static <T> ReaktorResponse<T> view(String viewName, T data) {
-        return new ReaktorResponse<>(ResponseEntity.ok(data), true, null, null, viewName, new java.util.HashMap<>());
+        return new ReaktorResponse<>(ResponseEntity.ok(data), true, null, null, viewName,
+                java.util.Collections.emptyMap());
     }
 
     public static <T> ReaktorResponse<T> error(String message) {
         return new ReaktorResponse<>(ResponseEntity.badRequest().build(), false, message, null, null,
-                new java.util.HashMap<>());
+                java.util.Collections.emptyMap());
     }
 
     public static <T> ReaktorResponse<T> error(List<Error> errors) {
         return new ReaktorResponse<>(ResponseEntity.badRequest().build(), false, null, errors, null,
-                new java.util.HashMap<>());
+                java.util.Collections.emptyMap());
     }
 
     public static <T> ReaktorResponse<T> created(URI location, T data) {
         return new ReaktorResponse<>(ResponseEntity.created(location).body(data), true, null, null, null,
-                new java.util.HashMap<>());
+                java.util.Collections.emptyMap());
     }
 
     public static <T> ReaktorResponse<T> notFound() {
         return new ReaktorResponse<>(ResponseEntity.notFound().build(), false, "Resource not found", null, null,
-                new java.util.HashMap<>());
+                java.util.Collections.emptyMap());
     }
 
     public static <T> ReaktorResponse<T> redirect(String url) {
         return new ReaktorResponse<>(ResponseEntity.status(HttpStatus.FOUND).build(), true, null, null,
-                "redirect:" + url, new java.util.HashMap<>());
+                "redirect:" + url, java.util.Collections.emptyMap());
     }
 
     public ReaktorResponse<T> withData(T data) {
@@ -104,36 +105,32 @@ public record ReaktorResponse<T>(
 
     @SuppressWarnings("unchecked")
     public ReaktorResponse<Object> with(String name, Object value) {
-        java.util.Map<String, Object> newData;
-        if (entity.getBody() instanceof java.util.Map) {
-            newData = new java.util.HashMap<>((java.util.Map<String, Object>) entity.getBody());
-        } else {
-            newData = new java.util.HashMap<>();
-            if (entity.getBody() != null) {
-                newData.put("data", entity.getBody());
-            }
-        }
+        java.util.Map<String, Object> newData = extractBodyAsMap();
         newData.put(name, value);
-        ResponseEntity<Object> newEntity = ResponseEntity.status(entity.getStatusCode()).headers(entity.getHeaders())
-                .body(newData);
-        return new ReaktorResponse<>(newEntity, success, message, errors, view, context);
+        return new ReaktorResponse<>(shallowCopyEntity(newData), success, message, errors, view, context);
     }
 
     @SuppressWarnings("unchecked")
     public ReaktorResponse<Object> withAll(java.util.Map<String, ?> attributes) {
-        java.util.Map<String, Object> newData;
-        if (entity.getBody() instanceof java.util.Map) {
-            newData = new java.util.HashMap<>((java.util.Map<String, Object>) entity.getBody());
-        } else {
-            newData = new java.util.HashMap<>();
-            if (entity.getBody() != null) {
-                newData.put("data", entity.getBody());
-            }
-        }
+        java.util.Map<String, Object> newData = extractBodyAsMap();
         newData.putAll(attributes);
-        ResponseEntity<Object> newEntity = ResponseEntity.status(entity.getStatusCode()).headers(entity.getHeaders())
-                .body(newData);
-        return new ReaktorResponse<>(newEntity, success, message, errors, view, context);
+        return new ReaktorResponse<>(shallowCopyEntity(newData), success, message, errors, view, context);
+    }
+
+    @SuppressWarnings("unchecked")
+    private java.util.Map<String, Object> extractBodyAsMap() {
+        if (entity.getBody() instanceof java.util.Map) {
+            return new java.util.HashMap<>((java.util.Map<String, Object>) entity.getBody());
+        }
+        java.util.Map<String, Object> newData = new java.util.HashMap<>();
+        if (entity.getBody() != null) {
+            newData.put("data", entity.getBody());
+        }
+        return newData;
+    }
+
+    private <R> ResponseEntity<R> shallowCopyEntity(R newBody) {
+        return ResponseEntity.status(entity.getStatusCode()).headers(entity.getHeaders()).body(newBody);
     }
 
     public ReaktorResponse<T> withContext(String name, Object value) {
