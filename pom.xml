@@ -13,7 +13,7 @@
 
     <groupId>io.github.wendelmax</groupId>
     <artifactId>reaktor-spring-mvc</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <packaging>pom</packaging>
     <name>Reaktor Spring MVC</name>
     <description>Thymeleaf dialect for declarative React components in Spring MVC</description>
@@ -51,10 +51,6 @@
 
     <modules>
         <module>reaktor-spring-mvc-starter</module>
-        <module>examples/store-showcase</module>
-        <module>examples/basics-hooks</module>
-        <module>examples/form-validation</module>
-        <module>examples/crud-jpa</module>
     </modules>
 
     <properties>
